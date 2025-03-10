@@ -8,6 +8,7 @@ class Produto{
     public string $descricao;
     public string $cor;
     public float $preco;
+    public string $foto;
 
     public function cadastrar(){
 
@@ -18,7 +19,8 @@ class Produto{
                 'nome'=> $this->nome,
                 'descricao'=> $this->descricao,
                 'cor'=> $this->cor,
-                'preco'=> $this->preco
+                'preco'=> $this->preco,
+                'foto'=> $this->foto
             ]
         );
         return $res;
@@ -49,6 +51,13 @@ class Produto{
                 "preco"=> $this->preco
             ]
         );
+        return $res;
+    }
+
+    public function excluir(){
+        $db = new Database('products');
+        $where = 'id_categoria ='.$this->id_categoria;
+        $res = $db->delete($where);
         return $res;
     }
 
