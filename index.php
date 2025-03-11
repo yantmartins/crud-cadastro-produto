@@ -1,42 +1,55 @@
 <?php
 require './App/Entity/Produto.php';
 
-if(isset($_POST['cadastrar'])){
+if(isset($_POST['cadastrar'])) {
 
     $nome = $_POST['nome'];
     $descricao = $_POST['descricao'];
     $cor = $_POST['cor'];
     $preco = $_POST['preco'];
-}
 
-$arquivo = $_FILES['foto'];
-if($arquivo['error']) die ("Falha ao enviar a foto");
-$pasta = './uploads/fotos';
-$nome_foto = $arquivo['name'];
-$novo_nome = uniqid();
-$extensao = strtolower(pathinfo($nome_foto, PATHINFO_EXTENSION));
+    // Verifica se o arquivo foi enviado corretamente
+    if(isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
+        $arquivo = $_FILES['foto'];
+        $pasta = './uploads/fotos/';
+        $nome_foto = $arquivo['name'];
+        $novo_nome = uniqid();
+        $extensao = strtolower(pathinfo($nome_foto, PATHINFO_EXTENSION));
 
-if ($extensao != 'pgn' && $extensao != 'jpg' && $extensao != 'jfif') die ("Extensão do arquivo inválida");
-$caminho = $pasta . $novo_nome . '.' .$extensao;
-$foto = move_uploaded_file($arquivo['tmp_name'], $caminho);
+        // Verifica se a extensão do arquivo é permitida
+        $extensoes_permitidas = ['png', 'jpg', 'jpeg', 'jfif'];
+        if (!in_array($extensao, $extensoes_permitidas)) {
+            die("Extensão do arquivo inválida");
+        }
 
-echo $caminho;
-echo "<br>".$foto;
+        // Define o caminho do arquivo
+        $caminho = $pasta . $novo_nome . '.' . $extensao;
+        $upload_sucesso = move_uploaded_file($arquivo['tmp_name'], $caminho);
 
-$objProduct = new Produto();
-$objProduct->nome = $nome;
-$objProduct->descricao = $descricao;
-$objProduct->cor = $cor;
-$objProduct->preco = $preco;
+        if (!$upload_sucesso) {
+            die("Erro ao salvar o arquivo.");
+        }
 
-print_r($objProduct);
-$res = $objProduct->cadastrar();
-if($res){
-    echo '<script> alert("Cadastrado com sucesso!")</script>';
-}else{
-    echo '<script> alert("ERROR")</script';
+    } else {
+        die("Erro: Nenhuma foto foi enviada ou ocorreu um erro no upload.");
+    }
+
+    $objProduct = new Produto();
+    $objProduct->nome = $nome;
+    $objProduct->descricao = $descricao;
+    $objProduct->cor = $cor;
+    $objProduct->preco = $preco;
+    $objProduct->foto = $caminho; // Definir corretamente a propriedade foto
+
+    $res = $objProduct->cadastrar();
+    if($res){
+        echo '<script> alert("Cadastrado com sucesso!")</script>';
+    } else {
+        echo '<script> alert("ERROR")</script>';
+    }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
